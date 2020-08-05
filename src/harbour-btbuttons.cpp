@@ -19,8 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 #ifdef QT_QML_DEBUG
-#include <QtQuick>
 #endif
+#include <QtQuick>
 
 #include <sailfishapp.h>
 #include "launcher.h"

@@ -34,5 +34,9 @@
         <source>Start Proxy</source>
         <translation>Proxy starten</translation>
     </message>
+    <message>
+        <source>Start with active bluetooth connection</source>
+        <translation>Starte mit aktiver Bluetoothverbindung</translation>
+    </message>
 </context>
 </TS>

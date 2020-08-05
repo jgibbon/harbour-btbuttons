@@ -10,7 +10,7 @@ Name:       harbour-btbuttons
 
 Summary:    BTtons
 Version:    0.1
-Release:    1
+Release:    2
 Group:      Qt/Qt
 License:    GPLv2
 URL:        https://www.github.com/jgibbon/harbour-btbuttons
@@ -19,10 +19,12 @@ Source100:  harbour-btbuttons.yaml
 Requires:   sailfishsilica-qt5 >= 0.10.9
 Requires:   bluez5-tools
 Requires:   bluez5
+Requires:   nemo-qml-plugin-dbus-qt5
 BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Quick)
+BuildRequires:  pkgconfig(Qt5DBus)
 BuildRequires:  desktop-file-utils
 Conflicts:   bluez
 

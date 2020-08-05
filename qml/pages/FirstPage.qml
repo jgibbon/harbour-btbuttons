@@ -26,13 +26,13 @@ Page {
     allowedOrientations: Orientation.All
     SilicaFlickable {
         anchors.fill: parent
-        contentHeight: page.height
+        contentHeight: mainColumn.height
         PullDownMenu {
             busy: app.applying
             quickSelect: true
             MenuItem {
                 text: mainButton.text
-                onClicked: app.toggleProxy()
+                onClicked: app.toggleProxy(true)
             }
         }
         PushUpMenu {
@@ -40,72 +40,91 @@ Page {
             quickSelect: true
             MenuItem {
                 text: mainButton.text
-                onClicked: app.toggleProxy()
+                onClicked: app.toggleProxy(true)
             }
         }
-        PageHeader {
-            id: pageHeader
-            title: qsTr("BTtons")
-        }
-
-        HighlightImage {
-            id: image
-            x: (parent.width - width) / 2
-            source: '../bttns-icon.svg'
-            color: Theme.highlightColor
-            width: Theme.itemSizeHuge
-            height: Theme.itemSizeHuge
-            sourceSize {
-                width: Theme.itemSizeHuge
-                height: Theme.itemSizeHuge
-            }
-
-            opacity: app.proxyRunning ? 1.0 : 0.4
-            Behavior on opacity {
-                NumberAnimation { duration: 500; easing.type: Easing.InOutCubic }
-            }
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                bottom: label.top
-                bottomMargin: Theme.paddingLarge
-            }
-        }
-        Label {
-            id: label
-            width: parent.width - Theme.horizontalPageMargin * 2
-            height: (parent.height - pageHeader.height) / 2
-            anchors.centerIn: parent
-            text: app.proxyRunning
-                  ? qsTr("Mpris proxy is running.")
-                  : qsTr("Mpris proxy isn't running.")
-            color: Theme.secondaryHighlightColor
-            font.pixelSize: Theme.fontSizeExtraLarge
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-        }
-        ButtonLayout {
-            id: buttonLayout
+        Column {
+            id: mainColumn
             width: parent.width
-            anchors {
-                top: label.bottom
-                topMargin: Theme.paddingLarge * 2
+            PageHeader {
+                id: pageHeader
+                title: qsTr("BTtons")
             }
-
-            Button {
-                id: mainButton
-                enabled: !app.applying
+            TextSwitch {
+                id: manageSwitch
+                text: qsTr("Start with active bluetooth connection")
+                checked: app.configAutoManage.value
+                onClicked: {
+                    app.configAutoManage.value = checked
+                    app.configAutoManage.sync()
+                    checked = Qt.binding(function() { return app.configAutoManage.value })
+                }
+            }
+            HighlightImage {
+                id: image
+                x: (parent.width - width) / 2
+                source: '../bttns-icon.svg'
+                color: Theme.highlightColor
+                width: parent.width //Theme.itemSizeHuge
+                height: Theme.itemSizeHuge
+                fillMode: Image.PreserveAspectFit
+                horizontalAlignment: Image.AlignHCenter
+                sourceSize {
+                    width: Theme.itemSizeHuge
+                    height: Theme.itemSizeHuge
+                }
+                opacity: app.proxyRunning ? 1.0 : 0.4
+                Behavior on opacity {
+                    NumberAnimation { duration: 500; easing.type: Easing.InOutCubic }
+                }
+            }
+            Label {
+                id: label
+                width: parent.width - Theme.horizontalPageMargin * 2
+                x: Theme.horizontalPageMargin
                 text: app.proxyRunning
-                      ? qsTr("Close Proxy")
-                      : qsTr("Start Proxy")
-                onClicked: app.toggleProxy()
+                      ? qsTr("Mpris proxy is running.")
+                      : qsTr("Mpris proxy isn't running.")
+                color: Theme.secondaryHighlightColor
+                font.pixelSize: Theme.fontSizeExtraLarge
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
             }
-            BusyIndicator {
-                size: BusyIndicatorSize.Large
-                anchors.centerIn: buttonLayout
-                running: app.applying
+            ButtonLayout {
+                id: buttonLayout
+                width: parent.width
+                visible: !app.configAutoManage.value
+                Button {
+                    id: mainButton
+                    enabled: !app.applying
+                    text: app.proxyRunning
+                          ? qsTr("Close Proxy")
+                          : qsTr("Start Proxy")
+                    onClicked: app.toggleProxy()
+                }
+                BusyIndicator {
+                    size: BusyIndicatorSize.Large
+                    anchors.centerIn: buttonLayout
+                    running: app.applying
+                }
+            }
+            ListView {
+                width: parent.width - Theme.horizontalPageMargin * 2
+                x: Theme.horizontalPageMargin
+                height: app.connectedDevices.count * Theme.itemSizeExtraSmall
+                model: app.connectedDevices
+                visible: app.configAutoManage.value
+                delegate: Label {
+                    width: parent.width
+
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    horizontalAlignment: Text.AlignHCenter
+                    height: Theme.itemSizeExtraSmall
+                    text: model.name
+                    color: Theme.highlightColor
+                }
             }
         }
-
     }
 }
