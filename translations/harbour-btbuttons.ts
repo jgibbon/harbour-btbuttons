@@ -27,15 +27,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Close Proxy</source>
+        <source>Automatically manage Proxy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Manager stays active after closing BTtons application.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Proxy started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Start/Stop Proxy manually</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stop Proxy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Start Proxy</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Start with active bluetooth connection</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

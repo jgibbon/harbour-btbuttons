@@ -31,7 +31,10 @@ Page {
             busy: app.applying
             quickSelect: true
             MenuItem {
-                text: mainButton.text
+                id: toggleMenuItem
+                text: app.proxyRunning
+                      ? qsTr("Stop Proxy")
+                      : qsTr("Start Proxy")
                 onClicked: app.toggleProxy(true)
             }
         }
@@ -39,7 +42,7 @@ Page {
             busy: app.applying
             quickSelect: true
             MenuItem {
-                text: mainButton.text
+                text: toggleMenuItem.text
                 onClicked: app.toggleProxy(true)
             }
         }
@@ -50,23 +53,13 @@ Page {
                 id: pageHeader
                 title: qsTr("BTtons")
             }
-            TextSwitch {
-                id: manageSwitch
-                text: qsTr("Start with active bluetooth connection")
-                checked: app.configAutoManage.value
-                onClicked: {
-                    app.configAutoManage.value = checked
-                    app.configAutoManage.sync()
-                    checked = Qt.binding(function() { return app.configAutoManage.value })
-                }
-            }
             HighlightImage {
                 id: image
                 x: (parent.width - width) / 2
                 source: '../bttns-icon.svg'
                 color: Theme.highlightColor
                 width: parent.width //Theme.itemSizeHuge
-                height: Theme.itemSizeHuge
+                height: Theme.itemSizeExtraLarge
                 fillMode: Image.PreserveAspectFit
                 horizontalAlignment: Image.AlignHCenter
                 sourceSize {
@@ -91,40 +84,60 @@ Page {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
-            ButtonLayout {
-                id: buttonLayout
-                width: parent.width
-                visible: !app.configAutoManage.value
-                Button {
-                    id: mainButton
-                    enabled: !app.applying
-                    text: app.proxyRunning
-                          ? qsTr("Close Proxy")
-                          : qsTr("Start Proxy")
-                    onClicked: app.toggleProxy()
-                }
-                BusyIndicator {
-                    size: BusyIndicatorSize.Large
-                    anchors.centerIn: buttonLayout
-                    running: app.applying
-                }
-            }
-            ListView {
+
+            Label {
                 width: parent.width - Theme.horizontalPageMargin * 2
                 x: Theme.horizontalPageMargin
-                height: app.connectedDevices.count * Theme.itemSizeExtraSmall
-                model: app.connectedDevices
                 visible: app.configAutoManage.value
-                delegate: Label {
-                    width: parent.width
-
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    horizontalAlignment: Text.AlignHCenter
-                    height: Theme.itemSizeExtraSmall
-                    text: model.name
-                    color: Theme.highlightColor
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                horizontalAlignment: Text.AlignHCenter
+                text: app.devicesString
+                color: Theme.highlightColor
+            }
+            TextSwitch {
+                id: manageSwitch
+                text: qsTr("Automatically manage Proxy")
+                description: qsTr("Manager stays active after closing BTtons application.")
+                checked: app.configAutoManage.value
+                busy: app.configAutoManage.value && app.client.status !== 2
+                onClicked: {
+                    app.configAutoManage.value = checked
+                    app.configAutoManage.sync()
+                    checked = Qt.binding(function() { return app.configAutoManage.value })
                 }
             }
+
+            TextSwitch {
+                id: manualSwitch
+                text: qsTr("Proxy started")
+                description: qsTr("Start/Stop Proxy manually")
+                checked: app.proxyRunning
+                enabled: !app.applying
+                busy: app.applying
+                onClicked: {
+                    if(!app.applying) {
+                        app.toggleProxy(true)
+                    }
+                    checked = Qt.binding(function() { return app.proxyRunning })
+                }
+            }
+
+//            ListView {
+//                width: parent.width - Theme.horizontalPageMargin * 2
+//                x: Theme.horizontalPageMargin
+//                height: app.connectedDevices.count * Theme.itemSizeExtraSmall
+//                model: app.connectedDevices
+//                visible: app.configAutoManage.value
+//                delegate: Label {
+//                    width: parent.width
+
+//                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+//                    horizontalAlignment: Text.AlignHCenter
+//                    height: Theme.itemSizeExtraSmall
+//                    text: model.name
+//                    color: Theme.highlightColor
+//                }
+//            }
         }
     }
 }

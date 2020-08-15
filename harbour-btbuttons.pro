@@ -18,11 +18,12 @@ SOURCES += src/harbour-btbuttons.cpp \
     src/launcher.cpp
 
 DISTFILES += qml/harbour-btbuttons.qml \
+    qml/bg.qml \
+    qml/bg/Scanner.qml \
     qml/cover/CoverPage.qml \
     qml/pages/FirstPage.qml \
     qml/bttns-icon.svg \
-    rpm/harbour-btbuttons.changes.in \
-    rpm/harbour-btbuttons.changes.run.in \
+    rpm/harbour-btbuttons.changes \
     rpm/harbour-btbuttons.spec \
     rpm/harbour-btbuttons.yaml \
     translations/*.ts \

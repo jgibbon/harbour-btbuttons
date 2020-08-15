@@ -49,6 +49,18 @@ CoverBackground {
               ? qsTr("Mpris proxy is running.")
               : qsTr("Mpris proxy isn't running.")
     }
+
+    Label {
+        width: parent.width - Theme.horizontalPageMargin * 2
+        anchors.top: label.bottom
+        anchors.horizontalCenter: label.horizontalCenter
+        visible: app.configAutoManage.value
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        horizontalAlignment: Text.AlignHCenter
+        text: app.devicesString
+        color: Theme.highlightColor
+        font.pixelSize: Theme.fontSizeExtraSmall
+    }
     BusyIndicator {
         id: indicator
         size: BusyIndicatorSize.Large

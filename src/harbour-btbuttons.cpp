@@ -24,14 +24,56 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <sailfishapp.h>
 #include "launcher.h"
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
+
+    QCoreApplication::setSetuidAllowed(true);
+
+
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
-    QScopedPointer<QQuickView> view(SailfishApp::createView());
-//    QQmlEngine *engine = view->engine();
+//    QScopedPointer<QQuickView> view(SailfishApp::createView());
+
+//    QCoreApplication cliapp(argc, argv);
+    QCoreApplication::setApplicationName("slumber-privileged");
+    QCoreApplication::setApplicationVersion("1.0");
+
+    QCommandLineParser parser;
+    QTextStream out(stdout);
+    parser.addOption({{"b", "background"}, "Start auto-managed background process."});
+    parser.addOption({{"v", "verbose"}, "Display all kinds of things."});
+//    QCommandLineOption bgOption("background", "Start auto-managed background process");
+//    parser.addOption(bgOption);
+    parser.setApplicationDescription("BTtons");
+    parser.addHelpOption();
+    // Process the actual command line arguments given by the user
+    parser.process(QCoreApplication::arguments());
+    qDebug() << "bg option" << parser.value("background") <<  parser.isSet("background");
+//    parser.addVersionOption();
+
     qmlRegisterType<Launcher>("Launcher", 1 , 0 , "Launcher");
-    view->setSource(SailfishApp::pathToMainQml());
-    view->showFullScreen();
-    return app->exec();
+
+    if(parser.isSet("background")) {
+        QQmlEngine engine;
+        QObject::connect(&engine, &QQmlApplicationEngine::quit, &QGuiApplication::quit);
+        QQmlComponent component(&engine, SailfishApp::pathTo("qml/bg.qml"));
+        engine.rootContext()->setContextProperty("verbose", parser.isSet("verbose"));
+//        component.setProperty("verbose", parser.isSet("verbose"));
+        component.create();
+        return app->exec();
+    }
+    else { // normal gui app
+
+        QScopedPointer<QQuickView> view(SailfishApp::createView());
+    //    QQmlEngine *engine = view->engine();
+        view->rootContext()->setContextProperty("executablePath", QCoreApplication::applicationFilePath());
+        view->rootContext()->setContextProperty("verbose", parser.isSet("verbose"));
+        view->setSource(SailfishApp::pathToMainQml());
+        view->showFullScreen();
+        return app->exec();
+
+
+
+    }
 }

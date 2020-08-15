@@ -38,6 +38,8 @@ ApplicationWindow
     property bool proxyRunning: false
     property bool applying: false
     property alias configAutoManage: configAutoManage
+    property alias client: client
+    property string devicesString
     onProxyRunningChanged: {
         console.log('Proxy is running:', proxyRunning);
         applying = false
@@ -48,11 +50,28 @@ ApplicationWindow
         defaultValue: false;
         onValueChanged: {
             if(!value) {
-                app.connectedDevices.clear()
-                app.audioDevices.clear()
+//                app.connectedDevices.clear()
+//                app.audioDevices.clear()
+            }
+            manageBackgroundProcess();
+        }
+        Component.onCompleted: {
+            verbose && console.log('config value on start', value);
+//            manageBackgroundProcess();
+        }
+        function manageBackgroundProcess(){
+            if(value && client.status < 2) {
+                verbose && console.log('I may start the background process');
+                launcher.launchAndForget(executablePath, ['-b']);
+            } else if(!value) {
+                client.typedCall('close',[], function () {
+                    // This will be called when the result is available
+                    console.log('process should close');
+                });
             }
         }
     }
+
     function checkProxyRunning() {
         var checkOutput = launcher.launch('ps -C mpris-proxy');
         proxyRunning = checkOutput.indexOf('mpris-proxy') > -1
@@ -84,140 +103,66 @@ ApplicationWindow
             checkProxyRunning();
         }
     }
-    property ListModel connectedDevices: ListModel {
-        onCountChanged: {
-            console.log('connected devices:', count);
+    Component.onCompleted: {
+        console.log('running this', executablePath)
 
-            if(app.configAutoManage.value && (count > 0) !== app.proxyRunning) {
-                app.toggleProxy();
-            }
-        }
-    }
-    property ListModel audioDevices: ListModel {}
-    Repeater {
-        model: audioDevices
-        delegate: Item {
-            id: audioDeviceItem
-            property bool hasConnection
-            DBusInterface {
-                id: audioDevice
-                bus: DBus.SystemBus
-                signalsEnabled: true
-                service: 'org.bluez'
-                iface: 'org.bluez.Device1'
-                path: model.key
-                property bool connected
-                onPropertiesChanged: {
-                    audioDeviceProperties.getConnectionState()
-                }
-            }
-            DBusInterface {
-                id: audioDeviceProperties
-                bus: DBus.SystemBus
-                service: 'org.bluez'
-                iface: 'org.freedesktop.DBus.Properties'
-                path: model.key
-                function getConnectionState() {
-                    typedCall('Get', [{type:'s',value:'org.bluez.Device1'},{type:'s',value:'Connected'}],
-                        function(result){
-                            console.log('deviceConnected…', model.name, result)
-                            if(result) {
-                                app.addDeviceToModel(app.audioDevices.get(index), app.connectedDevices);
-                            } else {
-                                app.removeDeviceFromModel(model.key, app.connectedDevices);
-                            }
-                        },
-                        function(err){console.log('connected query error', err)});
-                }
+        console.log('fg verbose', verbose);
 
-                onPropertiesChanged: {
-                    getConnectionState();
-                }
-                Component.onCompleted: getConnectionState()
-            }
+    }
+
+
+    DBusInterface {
+        id: client
+        service: 'de.gibbon.bgqml'
+        path: '/'
+        iface: 'de.gibbon.bgqml'
+        onStatusChanged: {
+            // 0: unknown
+            // 1: disconnected
+            // 2: available
+            console.log('status changed', status);
+            configAutoManage.manageBackgroundProcess();
+        }
+        watchServiceStatus: true
+        onWatchServiceStatusChanged: {
+            console.log('watch changed', watchServiceStatus);
+        }
+
+        propertiesEnabled: true
+        signalsEnabled: true
+
+        onPropertiesChanged: {
+            console.log('CLIENT dbus properties changed, though', isRunning)
+        }
+
+        function connectedDevicesChanged(devicesString) {
+            verbose && console.log('connected devices:', devicesString);
+            app.devicesString = devicesString;
+        }
+
+        function isRunningChanged(running) {
+            console.log('signal running', running);
+            app.proxyRunning = running;
+        }
+        Component.onCompleted: {
+            // 0 false
+            console.log('status', status, watchServiceStatus);
+            client.typedCall('getRunning',[], function (result) {
+                // This will be called when the result is available
+                console.log('Got running: ' + result);
+            });
+            client.typedCall('getConnectedDevices',[], function (devicesString) {
+                // This will be called when the result is available
+                app.devicesString = devicesString;
+            });
         }
     }
-    Loader {
-        id: scanLoader
-        active: app.configAutoManage.value
-        sourceComponent: btdevicescanner
-    }
-    function addDeviceToModel(device, model) {
-        var alreadyThere = false;
-        for(var i = 0; i < model.count; i++) {
-            if(model.get(i).key === device.key) {
-                alreadyThere = true;
-                continue;
-            }
-        }
-        if(!alreadyThere) {
-            model.append(device);
+    Timer {
+        interval: 300
+        running: true
+        onTriggered: {
+            configAutoManage.manageBackgroundProcess()
         }
     }
-    function removeDeviceFromModel(key, model) {
-        for(var i = 0; i < model.count; i++) {
-            var entry = model.get(i);
-            if(entry.key === key) {
-                model.remove(i);
-                continue;
-            }
-        }
-    }
-    Component {
-        id: btdevicescanner
-        Item {
-            id: scannerItem
-            DBusInterface {
-                id: deviceQuery
-                bus: DBus.SystemBus
-                signalsEnabled: true
-                service: 'org.bluez'
-                iface: 'org.freedesktop.DBus.ObjectManager'
-                path: '/'
-                // start signals
-                function interfacesAdded(key, obj) {
-                    if(obj && obj['org.bluez.Device1'] && obj['org.bluez.Device1'].Icon === 'audio-card') {
-                        app.addDeviceToModel({key: key, name: obj['org.bluez.Device1'].Name}, app.audioDevices)
-                    } else {
-//                        console.log('Added ----------------------------', JSON.stringify(obj), JSON.stringify(arr))
-                    }
-                }
-                function interfacesRemoved(key, arr) {
-                    if(arr[2] === 'org.bluez.Device1') {
-                        app.removeDeviceFromModel(key, app.connectedDevices);
-                        app.removeDeviceFromModel(key, app.audioDevices);
-                    }
-                }
-                // end signals
-                function getConnectedAudioDevices(cb) {
-                    deviceQuery.typedCall('GetManagedObjects', undefined, replyFactory(cb), function(err){console.log('error query', err)})
-                }
-                function replyFactory(cb) {
-                    return function filterDbusServices(dbusReply) {
-                        app.audioDevices.clear()
-                        console.log('does this work even')
-                        for (var key in dbusReply) {
-                            if('org.bluez.Device1' in dbusReply[key]) {
-                                if(dbusReply[key]['org.bluez.Device1'].Icon === 'audio-card') {
-                                    var entry = {
-                                        name: dbusReply[key]['org.bluez.Device1'].Name,
-                                        key: key
-                                    }
-                                    app.addDeviceToModel(entry, app.audioDevices);
-                                } else {
-//                                    console.log('device not matched:', JSON.stringify(dbusReply[key]['org.bluez.Device1']));
-                                }
-                            }
-                        }
-                        if(cb) {
-                            cb();
-                        }
-                    }
-                }
-                Component.onCompleted: {
-                    getConnectedAudioDevices(function(){});
-                }
-            }
-        }
-    }
+
 }
