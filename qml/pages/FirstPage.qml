@@ -88,11 +88,22 @@ Page {
             Label {
                 width: parent.width - Theme.horizontalPageMargin * 2
                 x: Theme.horizontalPageMargin
-                visible: app.configAutoManage.value
+                opacity: app.configAutoManage.value ? 1:0
+                height: app.configAutoManage.value ? implicitHeight : 0
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 horizontalAlignment: Text.AlignHCenter
-                text: app.devicesString
+                text: app.devicesString != '' ? app.devicesString : qsTr('No Devices detected')
                 color: Theme.highlightColor
+                Behavior on height {
+                    PropertyAnimation {
+                        easing.type: Easing.InOutCubic
+                    }
+                }
+                Behavior on opacity {
+                    PropertyAnimation {
+                        easing.type: Easing.InOutCubic
+                    }
+                }
             }
             TextSwitch {
                 id: manageSwitch
@@ -104,6 +115,22 @@ Page {
                     app.configAutoManage.value = checked
                     app.configAutoManage.sync()
                     checked = Qt.binding(function() { return app.configAutoManage.value })
+                }
+            }
+            TextSwitch {
+                id: watchdogSwitch
+                text: qsTr("Check for ofono CPU usage after device disconnect")
+                description: (nofonoExists ?
+                                 qsTr("Restarts ofono using nofono helper application if necessary. ") :
+                                 qsTr("Please install nofono to automatically restart ofono. "))
+                            + (enabled ? '' : qsTr('Only works when using Manager.'))
+                property bool nofonoExists: launcher.fileExists('/usr/share/harbour-nofono/helper/nofonohelper');
+                checked: app.configDoOfonoWatchDog.value
+                enabled: manageSwitch.checked
+                onClicked: {
+                    app.configDoOfonoWatchDog.value = checked
+                    app.configDoOfonoWatchDog.sync()
+                    checked = Qt.binding(function() { return app.configDoOfonoWatchDog.value })
                 }
             }
 

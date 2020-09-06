@@ -38,6 +38,7 @@ ApplicationWindow
     property bool proxyRunning: false
     property bool applying: false
     property alias configAutoManage: configAutoManage
+    property alias configDoOfonoWatchDog: configDoOfonoWatchDog
     property alias client: client
     property string devicesString
     onProxyRunningChanged: {
@@ -69,6 +70,14 @@ ApplicationWindow
                     console.log('process should close');
                 });
             }
+        }
+    }
+    ConfigurationValue {
+        id: configDoOfonoWatchDog
+        key: "/apps/btbuttons/ofonowatchdog";
+        defaultValue: false
+        onValueChanged: {
+            sync();
         }
     }
 
@@ -107,7 +116,6 @@ ApplicationWindow
         console.log('running this', executablePath)
 
         console.log('fg verbose', verbose);
-
     }
 
 

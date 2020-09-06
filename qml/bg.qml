@@ -1,9 +1,16 @@
 import QtQuick 2.6
 import Nemo.DBus 2.0
 import Launcher 1.0
+import Nemo.Configuration 1.0
 import 'bg'
 
 Item {
+
+    ConfigurationValue {
+        id: configDoOfonoWatchDog
+        key: "/apps/btbuttons/ofonowatchdog";
+        defaultValue: false
+    }
     DBusAdaptor {
         id: service
         property bool needUpdate: true
@@ -62,7 +69,6 @@ Item {
     Scanner {
         id: scanner
         onConnectedCountChanged: {
-
             if(scanner.connectedCount > 0) {
                 launcher.launchProxy();
             } else {
@@ -90,10 +96,58 @@ Item {
                 console.log('kill proxy')
                 launcher.launch('killall mpris-proxy');
                 service.isRunning = false
+                ofonoWatchdog()
             }
 
         }
+        function ofonoWatchdog() {
+            //watchdog test:
+            configDoOfonoWatchDog.sync();
+            if(configDoOfonoWatchDog.value) {
+                var helperloc = '/usr/share/harbour-nofono/helper/nofonohelper';
+                if(launcher.fileExists(helperloc)) {
+                   ofonoWatchTimer.start()
+                } else {
+                    console.log('nofono not installed');
+                }
+            } else {
+                console.log('watchdog not enabled');
+            }
+        }
     }
+    Timer {
+        id: ofonoWatchTimer
+        interval: 4000
+        property int watchNum:0
+        property int highCPUNum:0
+        onTriggered: {
+            if(watchNum < 4) {
+
+                //watchdog test:
+                var ofonocpuusage = launcher.launch('ps -C ofonod -o %cpu').split(' ');
+                var usage = parseFloat(ofonocpuusage[1])
+                console.log('ofono cpu', usage);
+                if(usage > 80) {
+                    highCPUNum = highCPUNum + 1;
+                    console.log('high cpu')
+                } else {
+                    console.log('normal cpu')
+                }
+
+                watchNum = watchNum + 1;
+                interval = 1000;
+                ofonoWatchTimer.restart();
+            } else {
+                if(highCPUNum > 2) {
+                    launcher.launch('/usr/share/harbour-nofono/helper/nofonohelper');
+                }
+                watchNum = 0;
+                highCPUNum = 0;
+                interval = 4000;
+            }
+        }
+    }
+
     Component.onCompleted: {
         console.log('bg verbose', verbose);
     }

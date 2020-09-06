@@ -10,7 +10,7 @@ Name:       harbour-btbuttons
 
 Summary:    BTtons
 Version:    0.1
-Release:    2
+Release:    3
 Group:      Qt/Qt
 License:    GPLv2
 URL:        https://www.github.com/jgibbon/harbour-btbuttons

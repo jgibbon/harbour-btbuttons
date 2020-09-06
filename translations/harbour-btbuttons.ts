@@ -50,5 +50,25 @@
         <source>Start Proxy</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Check for ofono CPU usage after device disconnect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No Devices detected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Please install nofono to automatically restart ofono. </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Only works when using Manager.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Restarts ofono using nofono helper application if necessary. </source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

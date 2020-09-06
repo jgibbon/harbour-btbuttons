@@ -28,27 +28,47 @@
     </message>
     <message>
         <source>Automatically manage Proxy</source>
-        <translation type="unfinished"></translation>
+        <translation>Proxy automatisch steuern</translation>
     </message>
     <message>
         <source>Manager stays active after closing BTtons application.</source>
-        <translation type="unfinished"></translation>
+        <translation>Manager bleibt aktiv, nachdem BTtons geschlossen wird.</translation>
     </message>
     <message>
         <source>Proxy started</source>
-        <translation type="unfinished"></translation>
+        <translation>Proxy gestartet</translation>
     </message>
     <message>
         <source>Start/Stop Proxy manually</source>
-        <translation type="unfinished"></translation>
+        <translation>Starte/Stoppe Proxy manuell</translation>
     </message>
     <message>
         <source>Stop Proxy</source>
-        <translation type="unfinished"></translation>
+        <translation>Stoppe Proxy</translation>
     </message>
     <message>
         <source>Start Proxy</source>
-        <translation type="unfinished"></translation>
+        <translation>Starte Proxy</translation>
+    </message>
+    <message>
+        <source>Check for ofono CPU usage after device disconnect</source>
+        <translation>Überprüfe CPU-Auslastung von ofono nach Gerätetrennung</translation>
+    </message>
+    <message>
+        <source>No Devices detected</source>
+        <translation>Keine Geräte erkannt</translation>
+    </message>
+    <message>
+        <source>Please install nofono to automatically restart ofono. </source>
+        <translation>Bitte nofono installieren, um ofono automatisch neuzustarten. </translation>
+    </message>
+    <message>
+        <source>Only works when using Manager.</source>
+        <translation>Funktioniert nur, wenn der Manager genutzt wird.</translation>
+    </message>
+    <message>
+        <source>Restarts ofono using nofono helper application if necessary. </source>
+        <translation>Startet ofono mithilfe des nofono-Programms neu, wenn nötig. </translation>
     </message>
 </context>
 </TS>
